@@ -5,7 +5,6 @@ from ebooklib import epub
 urlTOC = "https://practicalguidetoevil.wordpress.com/table-of-contents/"  # url to table of contents
 title = "A Practical Guide to Evil"
 author = "ErraticErrata"
-cover = "cover.jpg"  # Root to cover image if found
 
 sectionSplit = "h2"  # Use "-" in front of split text if the split is within the section "-h1" as an example
 sectionGroup = "ul"
@@ -24,7 +23,6 @@ def initializeEpubMetadata():
     global book
     book.set_title(title)
     book.add_author(author)
-    book.set_cover(content=cover, file_name=cover)
 
 
 def main():
