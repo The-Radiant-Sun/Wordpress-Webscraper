@@ -2,13 +2,14 @@ import requests
 from bs4 import BeautifulSoup
 from ebooklib import epub
 
-urlTOC = "https://practicalguidetoevil.wordpress.com/table-of-contents/"  # url to table of contents
-title = "A Practical Guide to Evil"
-author = "ErraticErrata"
+urlTOC = "https://ceruleanscrawling.wordpress.com/table-of-contents/"  # url to table of contents
+cover = None  # File tree to book
+title = "Heretical Edge"
+author = "Cerulean"
 
-sectionSplit = "h2"  # Use "-" in front of split text if the split is within the section "-h1" as an example
-sectionGroup = "ul"
-sectionItem = "li"
+sectionSplit = "-span"  # Use "-" in front of split text if the split is within the section "-h1" as an example
+sectionGroup = "p"  # Leave as None if there is no groups for sections
+sectionItem = "p"
 
 currentSectionTitle = ""
 currentSectionNumber = 0
@@ -24,12 +25,15 @@ def initializeEpubMetadata():
     book.set_title(title)
     book.add_author(author)
 
+    if cover is not None:
+        book.set_cover(file_name=cover, content=cover)
+
 
 def main():
     """For a provided book, extract information on all chapters"""
     global book, currentSectionTitle, currentSectionNumber
 
-    input(f"Press enter to begin book scraping of {title}")
+    input(f"Press enter to begin scraping of {title}")
 
     initializeEpubMetadata()
     # Access Table of Contents
@@ -43,7 +47,7 @@ def main():
         if child.name == sectionSplit and sectionSplit[0] != "-":  # Split in entries indicating new section
             currentSectionNumber += 1
             currentSectionTitle = child.text
-        elif child.name == sectionGroup:
+        elif sectionGroup is None or child.name == sectionGroup:
             iterateChapters(child)  # Get all connected chapters, then extract the content
 
     generateBook()
@@ -61,14 +65,14 @@ def iterateChapters(chapters):
 
         if sectionSplit[0] == "-":
             sections = chapterSoup.findAll(sectionSplit[1:])
-            if sections:
+            if sections and chapterSoup.find("a") is None:
                 currentSectionNumber += 1
                 currentSectionTitle = sections[0].text if len(chapterSoup.findAll(sectionSplit[1:])) == 1 else sections[currentSectionNumber].text
 
-        else:
-            currentChapterTitle = currentSectionTitle + " - " + chapterSoup.find("a").text  # Get Chapter Title
-            url = chapterSoup.find("a")["href"]  # Get URL of Chapter
-            extractChapter(url, currentChapterTitle)  # Extract content
+            elif currentSectionNumber != 0 and chapterSoup.find("a") is not None:
+                currentChapterTitle = currentSectionTitle + " - " + chapterSoup.find("a").text  # Get Chapter Title
+                url = chapterSoup.find("a")["href"]  # Get URL of Chapter
+                extractChapter(url, currentChapterTitle)  # Extract content
 
 
 def extractChapter(url, currentChapterTitle):
