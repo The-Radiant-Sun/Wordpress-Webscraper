@@ -29,7 +29,7 @@ def main():
     """For a provided book, extract information on all chapters"""
     global book, currentSectionTitle, currentSectionNumber
 
-    input(f"Press enter to begin book scraping of {title}")
+    input(f"Press enter to begin scraping of {title}")
 
     initializeEpubMetadata()
     # Access Table of Contents
