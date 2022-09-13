@@ -2,14 +2,14 @@ import requests
 from bs4 import BeautifulSoup
 from ebooklib import epub
 
-urlTOC = "https://ceruleanscrawling.wordpress.com/table-of-contents/"  # url to table of contents
-cover = None  # File tree to book
-title = "Heretical Edge"
-author = "Cerulean"
+urlTOC = ""  # url to table of contents
+cover = None  # File tree to book cover, otherwise use None
+title = ""
+author = ""
 
-sectionSplit = "-span"  # Use "-" in front of split text if the split is within the section "-h1" as an example
-sectionGroup = "p"  # Leave as None if there is no groups for sections
-sectionItem = "p"
+sectionSplit = ""  # Use "-" in front of split text if the split is within the section group "-h1" as an example
+sectionGroup = ""  # Leave as None if there is no groups for sections
+sectionItem = ""
 
 currentSectionTitle = ""
 currentSectionNumber = 0
@@ -43,7 +43,7 @@ def main():
 
     entryResults = soup.find("div", class_="entry-content")
 
-    for child in entryResults.find_all(recursive=False):
+    for child in entryResults.find_all(recursive=True):
         if child.name == sectionSplit and sectionSplit[0] != "-":  # Split in entries indicating new section
             currentSectionNumber += 1
             currentSectionTitle = child.text
@@ -68,11 +68,10 @@ def iterateChapters(chapters):
             if sections and chapterSoup.find("a") is None:
                 currentSectionNumber += 1
                 currentSectionTitle = sections[0].text if len(chapterSoup.findAll(sectionSplit[1:])) == 1 else sections[currentSectionNumber].text
-
-            elif currentSectionNumber != 0 and chapterSoup.find("a") is not None:
-                currentChapterTitle = currentSectionTitle + " - " + chapterSoup.find("a").text  # Get Chapter Title
-                url = chapterSoup.find("a")["href"]  # Get URL of Chapter
-                extractChapter(url, currentChapterTitle)  # Extract content
+        if currentSectionNumber != 0 and chapterSoup.find("a") is not None and chapterSoup.find("a")["href"][:len(urlTOC)] != urlTOC:
+            currentChapterTitle = currentSectionTitle + " - " + chapterSoup.find("a").text  # Get Chapter Title
+            url = chapterSoup.find("a")["href"]  # Get URL of Chapter
+            extractChapter(url, currentChapterTitle)  # Extract content
 
 
 def extractChapter(url, currentChapterTitle):
